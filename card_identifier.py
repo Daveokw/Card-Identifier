@@ -44,7 +44,7 @@ uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
     try:
         img = Image.open(uploaded_file).convert("RGB")
-        st.image(img, caption="Uploaded Image", use_column_width=False, width=250)
+        st.image(img, caption="Uploaded Image", use_container_width=True)
 
         input_tensor = transform(img).unsqueeze(0)
         with torch.no_grad():
