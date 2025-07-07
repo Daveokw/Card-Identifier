@@ -68,7 +68,7 @@ if uploaded_file is not None:
         if confidence >= CONFIDENCE_THRESHOLD:
             st.success(f"🧠 Predicted: {label}.")
         else:
-            st.warning(f"⚠️ Unable to confidently classify this image as a valid card.\n\nPlease upload a clearer or valid card image.")
+            st.warning(f"⚠️ Image does not appear to be a valid playing card\n\nPlease upload a clearer or valid card image.")
 
     except Exception as e:
         st.error(f"❌ Error during classification: {e}")
