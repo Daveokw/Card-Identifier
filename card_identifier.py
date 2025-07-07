@@ -2,6 +2,7 @@ import os
 import streamlit as st
 from PIL import Image
 import torch
+import torch.nn.functional as F
 import torchvision.transforms as transforms
 from torchvision import models
 import joblib
@@ -26,6 +27,9 @@ model.eval()
 # Load label encoder
 label_encoder = joblib.load(encoder_path)
 
+# Supported labels
+allowed_labels = label_encoder.classes_.tolist()
+
 # Image transform
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -37,9 +41,15 @@ transform = transforms.Compose([
 # Streamlit UI
 st.set_page_config(page_title="🎴 Card Identifier", layout="centered")
 st.title("🎴 Card Identifier")
-st.write("Upload a card image to identify its type.")
+st.write("Upload a **clear image** of a playing card from the standard 52-card deck or Joker.")
+
+with st.expander("📜 View Supported Card Types"):
+    st.write(", ".join(allowed_labels))
 
 uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
+
+# Confidence threshold
+CONFIDENCE_THRESHOLD = 0.70
 
 if uploaded_file is not None:
     try:
@@ -47,11 +57,18 @@ if uploaded_file is not None:
         st.image(img, caption="Uploaded Image", use_container_width=True)
 
         input_tensor = transform(img).unsqueeze(0)
+
         with torch.no_grad():
             output = model(input_tensor)
-            pred = torch.argmax(output, dim=1).item()
-            label = label_encoder.inverse_transform([pred])[0]
+            probabilities = F.softmax(output, dim=1)
+            max_prob, pred_class = torch.max(probabilities, dim=1)
+            confidence = max_prob.item()
+            label = label_encoder.inverse_transform([pred_class.item()])[0]
 
-        st.success(f"🧠 Predicted: **{label}**")
+        if confidence >= CONFIDENCE_THRESHOLD:
+            st.success(f"🧠 Predicted: {label}.")
+        else:
+            st.warning(f"⚠️ Unable to confidently classify this image as a valid card.\n\nPlease upload a clearer or valid card image.")
+
     except Exception as e:
         st.error(f"❌ Error during classification: {e}")
