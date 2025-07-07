@@ -76,7 +76,7 @@ def upload_and_classify():
 
         if confidence >= CONFIDENCE_THRESHOLD:
             result_label.config(
-                text=f"Predicted: {label}", fg="green"
+                text=f"Predicted: {label}.", fg="green"
             )
         else:
             result_label.config(
