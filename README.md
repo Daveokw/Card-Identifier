@@ -1,4 +1,4 @@
-# Card Identifier
+# Playing Card Image Classifier (PyTorch & Streamlit)
 
 A Deep Learning project that classifies playing cards from images. Built with **PyTorch** and **Streamlit**.
 
