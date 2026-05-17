@@ -14,4 +14,7 @@ jobs:
     steps:
       - name: Ping the Streamlit URL
         # We use a user-agent to make it look a bit more like a real browser request
-        run: curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" -sL https://card-identifier.streamlit.app/ > /dev/null
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+            "https://card-identifier.streamlit.app/"
