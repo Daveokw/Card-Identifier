@@ -1,74 +1,52 @@
-import os
+"""Streamlit interface for Card Identifier."""
+
+import logging
+
 import streamlit as st
-from PIL import Image
-import torch
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-from torchvision import models
-import joblib
-import sys
+from PIL import Image, UnidentifiedImageError
 
-# Setup paths
-if getattr(sys, 'frozen', False):
-    BASE_DIR = sys._MEIPASS
-else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from card_inference import InvalidCardImage, classify_card, get_session
 
-model_path = os.path.join(BASE_DIR, "card_cnn_model.pth")
-encoder_path = os.path.join(BASE_DIR, "label_encoder.joblib")
+LOGGER = logging.getLogger(__name__)
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+Image.MAX_IMAGE_PIXELS = 25_000_000
 
-# Load model
-num_classes = 53
-model = models.resnet18(pretrained=False)
-model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-model.load_state_dict(torch.load(model_path, map_location="cpu"))
-model.eval()
+st.set_page_config(page_title="Card Identifier", page_icon="🂡", layout="centered")
+st.title("🂡 Card Identifier")
+st.write("Upload a clear photograph containing one playing card.")
 
-# Load label encoder
-label_encoder = joblib.load(encoder_path)
+st.markdown(
+    """
+    <style>
+    [data-testid="stFileUploaderDropzoneInstructions"] small {display: none;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# Supported labels
-allowed_labels = label_encoder.classes_.tolist()
-
-# Image transform
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225])
-])
-
-# Streamlit UI
-st.set_page_config(page_title="🎴 Card Identifier", layout="centered")
-st.title("🎴 Card Identifier")
-st.write("Upload a **clear image** of a playing card from the standard 52-card deck or Joker.")
-
-with st.expander("📜 View Supported Card Types"):
-    st.write(", ".join(allowed_labels))
-
-uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
-
-# Confidence threshold
-CONFIDENCE_THRESHOLD = 0.70
+uploaded_file = st.file_uploader(
+    "Upload a card image",
+    type=["jpg", "jpeg", "jpe", "jfif", "png", "webp", "bmp", "dib", "gif", "tif", "tiff"],
+)
 
 if uploaded_file is not None:
     try:
-        img = Image.open(uploaded_file).convert("RGB")
-        st.image(img, caption="Uploaded Image", use_container_width=True)
+        if uploaded_file.size > MAX_UPLOAD_BYTES:
+            raise InvalidCardImage("The image is too large. Upload a file smaller than 20 MB.")
 
-        input_tensor = transform(img).unsqueeze(0)
+        image = Image.open(uploaded_file)
+        image.load()
+        st.image(image, caption="Uploaded image", width="stretch")
 
-        with torch.no_grad():
-            output = model(input_tensor)
-            probabilities = F.softmax(output, dim=1)
-            max_prob, pred_class = torch.max(probabilities, dim=1)
-            confidence = max_prob.item()
-            label = label_encoder.inverse_transform([pred_class.item()])[0]
+        with st.spinner("Identifying card…"):
+            get_session()
+            prediction = classify_card(image)
 
-        if confidence >= CONFIDENCE_THRESHOLD:
-            st.success(f"🧠 Predicted: {label}.")
-        else:
-            st.warning(f"⚠️ Image does not appear to be a valid playing card\n\nPlease upload a clearer or valid card image.")
-
-    except Exception as e:
-        st.error(f"❌ Error during classification: {e}")
+        st.success(f"Predicted card: {prediction.label.title()}")
+    except InvalidCardImage as error:
+        st.warning(str(error))
+    except (UnidentifiedImageError, OSError):
+        st.error("This file could not be read as an image. Upload a valid image and try again.")
+    except Exception:
+        LOGGER.exception("Unexpected card-classification failure")
+        st.error("The image could not be analysed. Please try another image.")

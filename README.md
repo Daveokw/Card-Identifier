@@ -1,52 +1,41 @@
-# Playing Card Image Classifier (PyTorch & Streamlit)
+# Card Identifier
 
-A Deep Learning project that classifies playing cards from images. Built with **PyTorch** and **Streamlit**.
+A lightweight computer vision application that identifies a playing card from an uploaded photograph. It covers the standard 52-card deck and Joker.
 
-## Live Demo
-Try the live app here: [Card Identifier on Streamlit](https://card-identifier.streamlit.app/)
+## Live demo
 
-## About the Project
-This project uses a **ResNet18** convolutional neural network to identify playing cards. The model has been trained on a custom dataset of playing card images, split into training, validation, and testing sets, covering **53 classes** (the standard 52-card deck + Joker).
+[Open Card Identifier on Streamlit](https://card-identifier.streamlit.app/)
 
-**Note:** This application is currently a prototype. While functional, the model is not perfect and may misclassify images, particularly in poor lighting or unusual angles. Future adjustments, improvements, and contributions are highly welcomed!
+## How it works
 
-**Key Features:**
-*   **Deep Learning:** Utilises a pre-trained ResNet18 model fine-tuned for this specific 53-class classification task.
-*   **Web Interface:** A sleek, interactive UI built with Streamlit allowing users to upload an image and get instant predictions.
-*   **Desktop App:** Also includes an alternative Tkinter-based desktop GUI (`card_identifier tkinter.py`).
-*   **High Accuracy:** Employs image augmentation and normalisation techniques for robust predictions.
+The application uses a 53-class ResNet18 model exported to ONNX for efficient CPU inference. Before classification, it corrects image orientation and checks basic image size, lighting, contrast, and sharpness. It evaluates portrait and landscape orientation pairs to make predictions less sensitive to camera rotation.
 
-## Technology Stack
-*   **Machine Learning:** PyTorch, Torchvision
-*   **Web Framework:** Streamlit
-*   **Data Processing:** Pillow (PIL), Joblib
-*   **Language:** Python 3.x
+Unclear or ambiguous inputs are declined instead of being assigned a forced label. The interface displays only the predicted card, without exposing raw model scores.
 
-## How to Run Locally
+## Features
 
-1. **Clone the repository** (or download the files):
-   ```bash
-   git clone <your-repo-url>
-   cd "Card Identifier"
-   ```
+- Identifies 52 standard playing cards and Joker
+- Handles common image orientations automatically
+- Rejects images that are too small, dark, bright, blurred, or ambiguous
+- Processes uploaded images in memory
+- Uses cached, CPU-based ONNX Runtime inference for Streamlit Community Cloud
+- Includes an optional Tkinter desktop interface
 
-2. **Install the required dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Run locally
 
-3. **Run the Streamlit App:**
-   ```bash
-   streamlit run card_identifier.py
-   ```
+```bash
+git clone https://github.com/Daveokw/Card-Identifier.git
+cd Card-Identifier
+pip install -r requirements.txt
+streamlit run card_identifier.py
+```
 
-4. *(Optional)* **Run the Tkinter Desktop App:**
-   ```bash
-   python "card_identifier tkinter.py"
-   ```
+To run the optional desktop interface:
 
-## Dataset
-The model was trained on a dataset containing thousands of images of playing cards. The dataset is organised into `train`, `valid`, and `test` directories to ensure the model generalises well to unseen images. 
+```bash
+python "card_identifier tkinter.py"
+```
 
-## Let's Connect
-Feel free to reach out if you have questions or want to collaborate!
+## Limitations
+
+The model may still make mistakes, particularly when a card is partly hidden, highly stylised, or visually different from its training data. Use a clear photograph containing one complete card. Model performance should be measured on a representative held-out dataset before the application is used in a consequential setting.
