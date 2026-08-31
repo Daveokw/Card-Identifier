@@ -5,3 +5,5 @@ __pycache__/
 .venv/
 venv/
 .streamlit/secrets.toml
+node_modules/
+keep_alive_screenshot.png
