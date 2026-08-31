@@ -13,7 +13,7 @@ Image.MAX_IMAGE_PIXELS = 25_000_000
 
 st.set_page_config(page_title="Card Identifier", page_icon="🂡", layout="centered")
 st.title("🂡 Card Identifier")
-st.write("Upload a clear photograph containing one playing card.")
+st.write("Upload a clear photograph of one card from a standard 52-card playing deck or a Joker.")
 
 st.markdown(
     """
