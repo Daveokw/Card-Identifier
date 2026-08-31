@@ -18,7 +18,7 @@ st.write("Upload a clear photograph containing one playing card.")
 st.markdown(
     """
     <style>
-    [data-testid="stFileUploaderDropzoneInstructions"] small {display: none;}
+    [data-testid="stFileUploaderDropzoneInstructions"] {display: none;}
     </style>
     """,
     unsafe_allow_html=True,
