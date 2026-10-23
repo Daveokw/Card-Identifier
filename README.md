@@ -21,7 +21,7 @@ Unclear or ambiguous inputs are declined instead of being assigned a forced labe
 - Uses cached, CPU-based ONNX Runtime inference for Streamlit Community Cloud
 - Includes an optional Tkinter desktop interface
 
-## Run locally
+## Run locally 
 
 ```bash
 git clone https://github.com/Daveokw/Card-Identifier.git
