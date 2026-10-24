@@ -36,6 +36,12 @@ To run the optional desktop interface:
 python "card_identifier tkinter.py"
 ```
 
+## GitHub Actions
+
+The keep-alive workflow checks the deployed interface every four hours and can request that Streamlit wake a sleeping application. The monthly `Record Repository Activity` workflow updates `.github/repository-heartbeat.txt` so the public repository continues to have activity even when no code is being developed. It requires Actions to be allowed to write repository contents. This creates one small bot commit per month and does not guarantee that a free Community Cloud application will never hibernate.
+
+GitHub may automatically disable scheduled workflows in a public repository after 60 days without repository activity. The heartbeat is intended to prevent that condition, but if a workflow has already been disabled it must first be re-enabled from the repository's Actions page, GitHub CLI, or REST API.
+
 ## Limitations
 
 The model may still make mistakes, particularly when a card is partly hidden, highly stylised, or visually different from its training data. Use a clear photograph containing one complete card. Model performance should be measured on a representative held-out dataset before the application is used in a consequential setting.
